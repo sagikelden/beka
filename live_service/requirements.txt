@@ -1,0 +1,7 @@
+fastapi
+uvicorn
+motor
+aioredis
+pydantic
+redis>=4.3.4
+

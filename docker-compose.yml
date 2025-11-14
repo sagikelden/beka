@@ -1,0 +1,62 @@
+services:
+  mongo:
+    image: mongo:6.0
+    restart: unless-stopped
+    volumes:
+      - mongo-data:/data/db
+    ports:
+      - "27017:27017"
+
+  redis:
+    image: redis:7
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+
+  auth:
+    build: ./auth_service
+    environment:
+      - MONGO_URI=mongodb://mongo:27017
+      - JWT_SECRET=supersecret
+    depends_on:
+      - mongo
+    ports:
+      - "8101:8000"
+
+  live:
+    build: ./live_service
+    environment:
+      - MONGO_URI=mongodb://mongo:27017
+      - REDIS_URI=redis://redis:6379/0
+    depends_on:
+      - mongo
+      - redis
+    ports:
+      - "8102:8000"
+
+  media:
+    build: ./media_service
+    environment:
+      - UPLOAD_DIR=/data/uploads
+    volumes:
+      - media-data:/data/uploads
+    ports:
+      - "8103:8000"
+
+  gateway:
+    build: ./api_gateway
+    environment:
+      - AUTH_URL=http://auth:8000
+      - LIVE_URL=http://live:8000
+      - MEDIA_URL=http://media:8000
+      - HOST=localhost
+    depends_on:
+      - auth
+      - live
+      - media
+    ports:
+      - "8080:8080"
+
+volumes:
+  mongo-data:
+  media-data:

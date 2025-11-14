@@ -1,0 +1,6 @@
+fastapi
+uvicorn
+httpx
+python-jose
+pydantic
+jinja2
