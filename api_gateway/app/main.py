@@ -50,3 +50,10 @@ templates = Jinja2Templates(directory="templates")
 @app.get("/", response_class=HTMLResponse)
 async def home(request: Request):
     return templates.TemplateResponse("index.html", {"request": request})
+@app.get("/health/db")
+async def check_db():
+    try:
+        await db.command("ping")
+        return {"status": "ok", "db": "connected"}
+    except Exception as e:
+        return {"status": "error", "details": str(e)}
